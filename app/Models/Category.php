@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Budget;
 
 class Category extends Model
 {
@@ -14,5 +15,10 @@ class Category extends Model
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function budget()
+    {
+        return $this->hasOne(Budget::class);
     }
 }

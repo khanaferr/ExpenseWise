@@ -11,6 +11,7 @@ use App\Models\UserProfile;
 use App\Models\Wallet;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\Budget;
 
 class User extends Authenticatable
 {
@@ -69,6 +70,11 @@ class User extends Authenticatable
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(Budget::class);
     }
 
 }
