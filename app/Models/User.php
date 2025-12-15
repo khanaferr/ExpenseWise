@@ -12,6 +12,9 @@ use App\Models\Wallet;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Budget;
+use App\Models\Admin;
+use App\Models\FinancialAdvisor;
+use App\Models\Consultation;
 
 class User extends Authenticatable
 {
@@ -27,6 +30,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -75,6 +79,25 @@ class User extends Authenticatable
     public function budgets()
     {
         return $this->hasMany(Budget::class);
+    }
+
+    public function isClient() { return $this->role === 'client'; }
+    public function isAdvisor() { return $this->role === 'advisor'; }
+    public function isAdmin() { return $this->role === 'admin'; }
+
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id');
+    }
+
+    public function advisorProfile()
+    {
+        return $this->hasOne(FinancialAdvisor::class, 'id');
+    }
+
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class, 'user_id');
     }
 
 }
