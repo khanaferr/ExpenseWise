@@ -56,9 +56,23 @@ class User extends Authenticatable
         ];
     }
 
+    public function isClient() { return $this->role === 'client'; }
+    public function isAdvisor() { return $this->role === 'advisor'; }
+    public function isAdmin() { return $this->role === 'admin'; }
+
     public function profile()
     {
         return $this->hasOne(UserProfile::class, 'id');
+    }
+
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id');
+    }
+
+    public function advisorProfile()
+    {
+        return $this->hasOne(FinancialAdvisor::class, 'id');
     }
 
     public function wallets()
@@ -79,20 +93,6 @@ class User extends Authenticatable
     public function budgets()
     {
         return $this->hasMany(Budget::class);
-    }
-
-    public function isClient() { return $this->role === 'client'; }
-    public function isAdvisor() { return $this->role === 'advisor'; }
-    public function isAdmin() { return $this->role === 'admin'; }
-
-    public function admin()
-    {
-        return $this->hasOne(Admin::class, 'id');
-    }
-
-    public function advisorProfile()
-    {
-        return $this->hasOne(FinancialAdvisor::class, 'id');
     }
 
     public function consultations()
