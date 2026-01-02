@@ -9,10 +9,6 @@ use App\Models\FinancialAdvisor;
 use App\Models\Consultation;
 use App\Models\Expense;
 use App\Models\Budget;
-<<<<<<< HEAD
-use App\Models\Wallet;
-=======
->>>>>>> cc7088c576312d1bee9e811d5b480ca5f8dfe868
 
 class ClientController extends Controller
 {
@@ -20,10 +16,8 @@ class ClientController extends Controller
     {
         $user = Auth::user();
 
-<<<<<<< HEAD
         $expenses = $user->expenses()->with(['category', 'wallet'])->latest()->take(5)->get();
         $wallets = $user->wallets;
-
 
         $budgets = $user->budgets()->with('category')->get()->map(function ($budget) use ($user) {
             $spent = Expense::where('user_id', $user->id)
@@ -40,12 +34,6 @@ class ClientController extends Controller
         });
 
         $myConsultations = $user->consultations()->with('advisor.user')->latest()->get();
-=======
-        $expenses = $user->expenses()->latest()->take(5)->get();
-        $wallets = $user->wallets;
-        $budgets = $user->budgets;
-        $myConsultations = $user->consultations()->with('advisor.user')->get();
->>>>>>> cc7088c576312d1bee9e811d5b480ca5f8dfe868
         $availableAdvisors = FinancialAdvisor::with('user')->get();
 
         return view('client.dashboard', compact(
@@ -55,62 +43,6 @@ class ClientController extends Controller
             'myConsultations',
             'availableAdvisors'
         ));
-<<<<<<< HEAD
-=======
-    }
-
-
-    public function storeExpense(Request $request)
-    {
-        $request->validate([
-            'amount' => 'required|numeric',
-            'wallet_id' => 'required|exists:wallets,id',
-            'category_id' => 'required|exists:categories,id',
-            'date' => 'required|date',
-            'description' => 'nullable|string|max:255',
-        ]);
-
-        Auth::user()->expenses()->create([
-            'amount' => $request->amount,
-            'wallet_id' => $request->wallet_id,
-            'category_id' => $request->category_id,
-            'date' => $request->date,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->back()->with('success', 'Expense added successfully!');
-    }
-
-    public function deleteExpense($id)
-    {
-        $expense = Auth::user()->expenses()->findOrFail($id);
-
-        $expense->delete();
-
-        return redirect()->back()->with('success', 'Expense deleted successfully!');
-    }
-
-
-    public function storeBudget(Request $request)
-    {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric|min:1',
-        ]);
-
-        Budget::updateOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'category_id' => $request->category_id
-            ],
-            [
-                'amount' => $request->amount,
-                'period' => 'monthly'
-            ]
-        );
-
-        return redirect()->back()->with('success', 'Budget set successfully!');
->>>>>>> cc7088c576312d1bee9e811d5b480ca5f8dfe868
     }
 
     public function storeExpense(Request $request)
@@ -154,7 +86,7 @@ class ClientController extends Controller
         DB::transaction(function () use ($expense) {
             // Restore the wallet balance
             $expense->wallet->increment('balance', $expense->amount);
-            
+
             // Delete the expense
             $expense->delete();
         });
@@ -191,7 +123,7 @@ class ClientController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->back()->with('success', 'Consultation requested!');
+        return redirect()->back()->with('success', 'Consultation requested successfully!');
     }
 
     public function cancelConsultation($id)

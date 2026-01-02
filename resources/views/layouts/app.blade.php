@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ExpenseWise - @yield('title', 'Dashboard')</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,6 +39,9 @@
                 </button>
                 <button onclick="switchView('budgets')" id="nav-budgets" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
                     <i class="fa-solid fa-chart-pie w-5"></i> Budgets
+                </button>
+                <button onclick="switchView('consultations')" id="nav-consultations" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-calendar-check w-5"></i> Consultations
                 </button>
             
             @elseif(Auth::user()->isAdvisor())
@@ -101,6 +105,12 @@
     </main>
 
     <script>
+        // Setup CSRF token for all AJAX requests
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (token) {
+            window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+        }
+
         function switchView(viewName) {
             // Reset Sidebar Styling
             document.querySelectorAll('.nav-item').forEach(btn => {
