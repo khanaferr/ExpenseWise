@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\FinancialAdvisor;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
@@ -62,5 +63,29 @@ class AdminController extends Controller
         $advisor->user->delete();
 
         return redirect()->back()->with('success', 'Advisor deleted successfully.');
+    }
+
+    public function storeClient(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'client',
+        ]);
+
+        UserProfile::create([
+            'id' => $user->id,
+            'currency' => $request->currency ?? 'USD',
+            'monthly_budget_limit' => $request->monthly_budget_limit ?? null,
+        ]);
+
+        return redirect()->back()->with('success', 'New Client created successfully.');
     }
 }

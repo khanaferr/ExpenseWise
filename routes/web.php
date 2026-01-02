@@ -40,6 +40,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/budgets', [ClientController::class, 'storeBudget'])->name('client.budgets.store');
 
+        Route::post('/wallets', [ClientController::class, 'storeWallet'])->name('client.wallets.store');
+        Route::post('/categories', [ClientController::class, 'storeCategory'])->name('client.categories.store');
+
         Route::post('/consultations', [ClientController::class, 'storeConsultation'])->name('client.consultations.store');
         Route::delete('/consultations/{id}', [ClientController::class, 'cancelConsultation'])->name('client.consultations.cancel');
     });
@@ -60,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/advisors', [AdminController::class, 'storeAdvisor'])->name('admin.advisors.store');
         Route::delete('/advisors/{id}', [AdminController::class, 'deleteAdvisor'])->name('admin.advisors.delete');
 
+        Route::post('/clients', [AdminController::class, 'storeClient'])->name('admin.clients.store');
         Route::delete('/clients/{id}', [AdminController::class, 'deleteClient'])->name('admin.clients.delete');
     });
 });

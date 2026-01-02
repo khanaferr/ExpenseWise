@@ -9,6 +9,8 @@ use App\Models\FinancialAdvisor;
 use App\Models\Consultation;
 use App\Models\Expense;
 use App\Models\Budget;
+use App\Models\Wallet;
+use App\Models\Category;
 
 class ClientController extends Controller
 {
@@ -130,5 +132,35 @@ class ClientController extends Controller
     {
         Auth::user()->consultations()->findOrFail($id)->delete();
         return redirect()->back()->with('success', 'Consultation cancelled.');
+    }
+
+    public function storeWallet(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'balance' => 'required|numeric|min:0',
+        ]);
+
+        Auth::user()->wallets()->create([
+            'name' => $request->name,
+            'balance' => $request->balance,
+        ]);
+
+        return redirect()->back()->with('success', 'Wallet created successfully!');
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'nullable|string|in:expense,income',
+        ]);
+
+        Auth::user()->categories()->create([
+            'name' => $request->name,
+            'type' => $request->type ?? 'expense',
+        ]);
+
+        return redirect()->back()->with('success', 'Category created successfully!');
     }
 }

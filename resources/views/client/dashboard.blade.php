@@ -3,9 +3,14 @@
 @section('title', 'My Expenses')
 
 @section('header-actions')
-    <button onclick="toggleModal('transactionModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-all">
-        <i class="fa-solid fa-plus"></i> Add Transaction
-    </button>
+    <div class="flex gap-2">
+        <button onclick="toggleModal('addCategoryModal')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-all">
+            <i class="fa-solid fa-tag"></i> Add Category
+        </button>
+        <button onclick="toggleModal('transactionModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-all">
+            <i class="fa-solid fa-plus"></i> Add Transaction
+        </button>
+    </div>
 @endsection
 
 @section('content')
@@ -72,7 +77,12 @@
         </div>
     </div>
 
-    <div id="view-wallets" class="view-section">
+    <div id="view-wallets" class="view-section space-y-6">
+        <div class="flex justify-end">
+            <button onclick="toggleModal('addWalletModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-plus"></i> Add Wallet
+            </button>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($wallets as $wallet)
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
@@ -269,6 +279,62 @@
                 <li class="p-6 text-center text-gray-500 text-sm">No consultations booked yet.</li>
                 @endforelse
             </ul>
+        </div>
+    </div>
+
+    <!-- Add Wallet Modal -->
+    <div id="addWalletModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-700">Add New Wallet</h3>
+                <button onclick="toggleModal('addWalletModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form action="{{ route('client.wallets.store') }}" method="POST" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Wallet Name</label>
+                    <input type="text" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g., Chase Bank, Cash, PayPal" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Initial Balance</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-gray-400">$</span>
+                        <input type="number" name="balance" step="0.01" min="0" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition-colors">Create Wallet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-700">Add New Category</h3>
+                <button onclick="toggleModal('addCategoryModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form action="{{ route('client.categories.store') }}" method="POST" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category Name</label>
+                    <input type="text" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g., Food & Dining, Transportation" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
+                    <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="expense" selected>Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition-colors">Create Category</button>
+            </form>
         </div>
     </div>
 
