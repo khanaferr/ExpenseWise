@@ -97,14 +97,19 @@
             <div class="flex justify-between items-end mb-2">
                 <div>
                     <h3 class="font-bold text-gray-800">{{ $budget->category->name }}</h3>
-                    <p class="text-xs text-gray-500">Monthly Limit</p>
+                    <p class="text-xs text-gray-500">
+                        Spent: ${{ number_format($budget->spent, 0) }} / ${{ number_format($budget->amount, 0) }}
+                    </p>
                 </div>
                 <div class="text-right">
-                    <span class="font-bold text-indigo-600">${{ number_format($budget->amount, 0) }}</span>
+                    <span class="font-bold {{ $budget->remaining < 0 ? 'text-red-500' : 'text-indigo-600' }}">
+                        ${{ number_format($budget->remaining, 0) }} Left
+                    </span>
                 </div>
             </div>
-            <div class="w-full bg-gray-100 rounded-full h-3">
-                <div class="bg-indigo-500 h-3 rounded-full" style="width: 50%"></div>
+            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                <div class="h-3 rounded-full {{ $budget->percentage > 100 ? 'bg-red-500' : 'bg-indigo-500' }}" 
+                     style="width: {{ min($budget->percentage, 100) }}%"></div>
             </div>
         </div>
         @endforeach

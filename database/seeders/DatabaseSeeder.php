@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create ADMIN User
         $admin = User::create([
             'name' => 'System Admin',
             'email' => 'admin@expensewise.com',
@@ -24,11 +23,9 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // Link to Admin Table
         Admin::create(['id' => $admin->id, 'department' => 'IT Support']);
 
 
-        // 2. Create FINANCIAL ADVISOR User
         $advisor = User::create([
             'name' => 'Dr. Wealth',
             'email' => 'advisor@expensewise.com',
@@ -36,7 +33,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'advisor',
         ]);
 
-        // Link to Financial Advisor Table
         FinancialAdvisor::create([
             'id' => $advisor->id,
             'certification_id' => 'CPA-998877',
@@ -44,7 +40,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-        // 3. Create CLIENT User
         $client = User::create([
             'name' => 'John Doe',
             'email' => 'client@expensewise.com',
@@ -52,14 +47,12 @@ class DatabaseSeeder extends Seeder
             'role' => 'client',
         ]);
 
-        // Link to User Profile
         UserProfile::create([
             'id' => $client->id,
             'currency' => 'USD',
             'monthly_budget_limit' => 2000.00
         ]);
 
-        // 4. Create Wallets for the Client
         $walletBank = Wallet::create([
             'user_id' => $client->id,
             'name' => 'Chase Bank',
@@ -72,7 +65,6 @@ class DatabaseSeeder extends Seeder
             'balance' => 200.00
         ]);
 
-        // 5. Create Categories for the Client
         $catFood = Category::create([
             'user_id' => $client->id,
             'name' => 'Food & Dining',
@@ -85,7 +77,6 @@ class DatabaseSeeder extends Seeder
             'type' => 'expense'
         ]);
 
-        // 6. Create Dummy Expenses (So the dashboard isn't empty)
         Expense::create([
             'user_id' => $client->id,
             'wallet_id' => $walletBank->id,

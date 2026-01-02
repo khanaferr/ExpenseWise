@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialAdvisor extends Model
 {
+
     use HasFactory;
 
     protected $fillable = ['id', 'certification_id', 'hourly_rate'];
-    
+
     public $incrementing = false;
     protected $primaryKey = 'id';
 
@@ -27,6 +28,6 @@ class FinancialAdvisor extends Model
     public function clients()
     {
         return $this->belongsToMany(User::class, 'consultations', 'advisor_id', 'user_id')
-                    ->withPivot('scheduled_at', 'status');
+            ->withPivot('scheduled_at', 'status');
     }
 }
