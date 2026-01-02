@@ -86,10 +86,8 @@ class ClientController extends Controller
         $expense = $user->expenses()->with('wallet')->findOrFail($id);
 
         DB::transaction(function () use ($expense) {
-            // Restore the wallet balance
             $expense->wallet->increment('balance', $expense->amount);
 
-            // Delete the expense
             $expense->delete();
         });
 

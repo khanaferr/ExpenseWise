@@ -59,7 +59,6 @@ class AdminController extends Controller
     {
         $advisor = FinancialAdvisor::with('user')->findOrFail($id);
         
-        // Delete the user first, which will cascade delete the advisor record
         $advisor->user->delete();
 
         return redirect()->back()->with('success', 'Advisor deleted successfully.');

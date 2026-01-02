@@ -221,7 +221,7 @@
                 <button onclick="toggleModal('consultationModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="{{ route('client.consultations.store') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('client.consultations.store') }}" method="POST" class="p-6 space-y-4" id="consultationForm">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Advisor</label>

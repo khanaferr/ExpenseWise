@@ -105,41 +105,49 @@
     </main>
 
     <script>
-        // Setup CSRF token for all AJAX requests
         const token = document.querySelector('meta[name="csrf-token"]');
         if (token) {
             window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
         }
 
         function switchView(viewName) {
-            // Reset Sidebar Styling
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.classList.remove('bg-indigo-50', 'text-indigo-600');
                 btn.classList.add('text-gray-600', 'hover:bg-gray-50');
             });
 
-            // Activate Clicked Link (if exists)
             const activeBtn = document.getElementById(`nav-${viewName}`);
             if(activeBtn) {
                 activeBtn.classList.add('bg-indigo-50', 'text-indigo-600');
                 activeBtn.classList.remove('text-gray-600');
             }
 
-            // Hide all sections
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             
-            // Show selected section
             const targetSection = document.getElementById(`view-${viewName}`);
             if(targetSection) targetSection.classList.add('active');
 
-            // Update Header Title
             const titleEl = document.getElementById('page-title');
             if(titleEl) titleEl.textContent = viewName.charAt(0).toUpperCase() + viewName.slice(1);
         }
 
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
-            if(modal) modal.classList.toggle('hidden');
+            if(modal) {
+                const isOpening = modal.classList.contains('hidden');
+                modal.classList.toggle('hidden');
+                
+                if (isOpening) {
+                    const csrfInputs = modal.querySelectorAll('input[name="_token"]');
+                    const metaToken = document.querySelector('meta[name="csrf-token"]');
+                    if (metaToken && csrfInputs.length > 0) {
+                        csrfInputs.forEach(input => {
+                            input.value = metaToken.content;
+                        });
+                    }
+                    
+                }
+            }
         }
     </script>
     
