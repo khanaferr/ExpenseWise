@@ -41,7 +41,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/budgets', [ClientController::class, 'storeBudget'])->name('client.budgets.store');
 
         Route::post('/wallets', [ClientController::class, 'storeWallet'])->name('client.wallets.store');
+        Route::delete('/wallets/{id}', [ClientController::class, 'deleteWallet'])->name('client.wallets.delete');
         Route::post('/categories', [ClientController::class, 'storeCategory'])->name('client.categories.store');
+
+        Route::delete('/budgets/{id}', [ClientController::class, 'deleteBudget'])->name('client.budgets.delete');
 
         Route::post('/consultations', [ClientController::class, 'storeConsultation'])->name('client.consultations.store');
         Route::delete('/consultations/{id}', [ClientController::class, 'cancelConsultation'])->name('client.consultations.cancel');

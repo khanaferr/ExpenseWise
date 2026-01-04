@@ -20,6 +20,18 @@ class ClientController extends Controller
 
         $expenses = $user->expenses()->with(['category', 'wallet'])->latest()->take(5)->get();
         $wallets = $user->wallets;
+        
+        $totalIncome = $user->expenses()
+            ->whereHas('category', function($q) {
+                $q->where('type', 'income');
+            })
+            ->sum('amount');
+        
+        $totalExpenses = $user->expenses()
+            ->whereHas('category', function($q) {
+                $q->where('type', 'expense');
+            })
+            ->sum('amount');
 
         $budgets = $user->budgets()->with('category')->get()->map(function ($budget) use ($user) {
             $spent = Expense::where('user_id', $user->id)
@@ -38,12 +50,83 @@ class ClientController extends Controller
         $myConsultations = $user->consultations()->with('advisor.user')->latest()->get();
         $availableAdvisors = FinancialAdvisor::with('user')->get();
 
+        $categorySpending = Expense::where('user_id', $user->id)
+            ->whereHas('category', function($q) {
+                $q->where('type', 'expense');
+            })
+            ->with('category')
+            ->get()
+            ->groupBy('category_id')
+            ->map(function ($expenses) {
+                $firstExpense = $expenses->first();
+                return [
+                    'category' => $firstExpense->category->name ?? 'Uncategorized',
+                    'amount' => floatval($expenses->sum('amount'))
+                ];
+            })
+            ->values();
+
+        $monthlyTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $total = Expense::where('user_id', $user->id)
+                ->whereHas('category', function($q) {
+                    $q->where('type', 'expense');
+                })
+                ->whereYear('date', $month->year)
+                ->whereMonth('date', $month->month)
+                ->sum('amount');
+            $monthlyTrend[] = [
+                'month' => $month->format('M'),
+                'amount' => floatval($total)
+            ];
+        }
+
+        $tips = [];
+        $thisMonthSpending = Expense::where('user_id', $user->id)
+            ->whereHas('category', function($q) {
+                $q->where('type', 'expense');
+            })
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->sum('amount');
+        $lastMonthSpending = Expense::where('user_id', $user->id)
+            ->whereHas('category', function($q) {
+                $q->where('type', 'expense');
+            })
+            ->whereMonth('date', now()->subMonth()->month)
+            ->whereYear('date', now()->subMonth()->year)
+            ->sum('amount');
+        
+        if ($lastMonthSpending > 0) {
+            $percentageChange = (($thisMonthSpending - $lastMonthSpending) / $lastMonthSpending) * 100;
+            if ($percentageChange > 20) {
+                $tips[] = "You spent " . number_format($percentageChange, 1) . "% more this month compared to last month. Consider reviewing your expenses.";
+            } elseif ($percentageChange < -20) {
+                $tips[] = "Great job! You spent " . number_format(abs($percentageChange), 1) . "% less this month. Keep up the good work!";
+            }
+        }
+
+        $topCategory = $categorySpending->sortByDesc('amount')->first();
+        if ($topCategory && $topCategory['amount'] > 0) {
+            $categoryTotal = $categorySpending->sum('amount');
+            $categoryPercentage = ($topCategory['amount'] / $categoryTotal) * 100;
+            if ($categoryPercentage > 40) {
+                $tips[] = "Most of your spending (" . number_format($categoryPercentage, 1) . "%) is on " . $topCategory['category'] . ". Consider setting a budget for this category.";
+            }
+        }
+
         return view('client.dashboard', compact(
             'expenses',
             'wallets',
             'budgets',
             'myConsultations',
-            'availableAdvisors'
+            'availableAdvisors',
+            'categorySpending',
+            'monthlyTrend',
+            'tips',
+            'totalIncome',
+            'totalExpenses'
         ));
     }
 
@@ -59,13 +142,13 @@ class ClientController extends Controller
 
         $user = Auth::user();
         $wallet = $user->wallets()->findOrFail($request->wallet_id);
+        $category = Category::findOrFail($request->category_id);
 
-        if ($wallet->balance < $request->amount) {
+        if ($category->type === 'expense' && $wallet->balance < $request->amount) {
             return redirect()->back()->withErrors(['amount' => 'Insufficient funds in this wallet.']);
         }
 
-
-        DB::transaction(function () use ($request, $user, $wallet) {
+        DB::transaction(function () use ($request, $user, $wallet, $category) {
             $user->expenses()->create([
                 'amount' => $request->amount,
                 'wallet_id' => $request->wallet_id,
@@ -74,24 +157,36 @@ class ClientController extends Controller
                 'description' => $request->description,
             ]);
 
-            $wallet->decrement('balance', $request->amount);
+            if ($category->type === 'income') {
+                $wallet->increment('balance', $request->amount);
+            } else {
+                $wallet->decrement('balance', $request->amount);
+            }
         });
 
-        return redirect()->back()->with('success', 'Expense added and wallet updated!');
+        $message = $category->type === 'income' 
+            ? 'Income added and wallet updated!' 
+            : 'Expense added and wallet updated!';
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function deleteExpense($id)
     {
         $user = Auth::user();
-        $expense = $user->expenses()->with('wallet')->findOrFail($id);
+        $expense = $user->expenses()->with(['wallet', 'category'])->findOrFail($id);
 
         DB::transaction(function () use ($expense) {
-            $expense->wallet->increment('balance', $expense->amount);
+            if ($expense->category->type === 'income') {
+                $expense->wallet->decrement('balance', $expense->amount);
+            } else {
+                $expense->wallet->increment('balance', $expense->amount);
+            }
 
             $expense->delete();
         });
 
-        return redirect()->back()->with('success', 'Expense deleted and wallet balance restored.');
+        return redirect()->back()->with('success', 'Transaction deleted and wallet balance updated.');
     }
 
     public function storeBudget(Request $request)
@@ -160,5 +255,31 @@ class ClientController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Category created successfully!');
+    }
+
+    public function deleteWallet($id)
+    {
+        $user = Auth::user();
+        $wallet = $user->wallets()->findOrFail($id);
+
+        $hasExpenses = $user->expenses()->where('wallet_id', $wallet->id)->exists();
+        
+        if ($hasExpenses) {
+            return redirect()->back()->withErrors(['wallet' => 'Cannot delete wallet with existing transactions. Please delete or reassign transactions first.']);
+        }
+
+        $wallet->delete();
+
+        return redirect()->back()->with('success', 'Wallet deleted successfully.');
+    }
+
+    public function deleteBudget($id)
+    {
+        $user = Auth::user();
+        $budget = $user->budgets()->findOrFail($id);
+
+        $budget->delete();
+
+        return redirect()->back()->with('success', 'Budget deleted successfully.');
     }
 }

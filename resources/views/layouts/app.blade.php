@@ -43,6 +43,9 @@
                 <button onclick="switchView('consultations')" id="nav-consultations" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
                     <i class="fa-solid fa-calendar-check w-5"></i> Consultations
                 </button>
+                <button onclick="switchView('insights')" id="nav-insights" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-arrow-trend-up w-5"></i> Insights
+                </button>
             
             @elseif(Auth::user()->isAdvisor())
                 <button onclick="switchView('requests')" id="nav-requests" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-sm font-medium bg-indigo-50 text-indigo-600 rounded-lg transition-colors">

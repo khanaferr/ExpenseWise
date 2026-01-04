@@ -17,12 +17,18 @@ class FinancialAdvisorController extends Controller
         $pendingConsultations = $advisor->consultations()
             ->where('status', 'pending')
             ->with('client')
-            ->get();
+            ->get()
+            ->filter(function ($consultation) {
+                return $consultation->client !== null;
+            });
 
         $confirmedConsultations = $advisor->consultations()
             ->where('status', 'confirmed')
             ->with('client')
-            ->get();
+            ->get()
+            ->filter(function ($consultation) {
+                return $consultation->client !== null;
+            });
 
         return view('advisor.dashboard', compact('pendingConsultations', 'confirmedConsultations'));
     }
